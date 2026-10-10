@@ -1,26 +1,48 @@
 {
   "name": "Agape Study Bible",
+  "short_name": "StudyBible",
+  "subtitle": "Read, study, and search the Bible",
   "description": "Full-featured Bible study app with search, bookmarks, highlights, cross-references, and interlinear.",
   "launch_path": "/agape-study-bible-pwa/index.html",
-  "icons": {
-    "56": "/agape-study-bible-pwa/icons/icon-56.png",
-    "112": "/agape-study-bible-pwa/icons/icon-112.png"
-  },
+  "start_url": "/agape-study-bible-pwa/index.html",
+  "display": "fullscreen",
+  "icons": [
+    {
+      "src": "https://gabebrpierce.github.io/agape-study-bible-pwa/icons/icon-56.png",
+      "sizes": "56x56",
+      "type": "image/png"
+    },
+    {
+      "src": "https://gabebrpierce.github.io/agape-study-bible-pwa/icons/icon-112.png",
+      "sizes": "112x112",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#1a1a2e",
+  "background_color": "#121212",
   "developer": {
     "name": "Agape",
     "url": "https://github.com"
   },
   "version": "1.0.0",
-  "type": "web",
-  "default_locale": "en",
+  "default_locale": "en-US",
   "locales": {
-    "en": {
+    "en-US": {
       "name": "Agape Study Bible",
+      "subtitle": "Read, study, and search the Bible",
       "description": "Full-featured Bible study app with search, bookmarks, highlights, cross-references, and interlinear."
     }
   },
   "orientation": "portrait",
   "fullscreen": "true",
   "installs_allowed_from": ["*"],
-  "permissions": {}
+  "permissions": {},
+  "b2g_features": {
+    "version": "1.0.0",
+    "subtitle": "Read, study, and search the Bible",
+    "developer": {
+      "name": "Agape",
+      "url": "https://github.com"
+    }
+  }
 }
