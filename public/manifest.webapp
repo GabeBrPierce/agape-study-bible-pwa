@@ -1,0 +1,26 @@
+{
+  "name": "Agape Study Bible",
+  "description": "Full-featured Bible study app with search, bookmarks, highlights, cross-references, and interlinear.",
+  "launch_path": "/agape-study-bible-pwa/index.html",
+  "icons": {
+    "56": "/agape-study-bible-pwa/icons/icon-56.png",
+    "112": "/agape-study-bible-pwa/icons/icon-112.png"
+  },
+  "developer": {
+    "name": "Agape",
+    "url": "https://github.com"
+  },
+  "version": "1.0.0",
+  "type": "web",
+  "default_locale": "en",
+  "locales": {
+    "en": {
+      "name": "Agape Study Bible",
+      "description": "Full-featured Bible study app with search, bookmarks, highlights, cross-references, and interlinear."
+    }
+  },
+  "orientation": "portrait",
+  "fullscreen": "true",
+  "installs_allowed_from": ["*"],
+  "permissions": {}
+}
