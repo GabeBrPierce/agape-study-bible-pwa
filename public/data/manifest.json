@@ -1,5 +1,52 @@
 {
   "translations": [
-    { "id": "web", "name": "World English Bible", "shortName": "WEB", "language": "English" }
+    {
+      "id": "web",
+      "name": "World English Bible",
+      "shortName": "WEB",
+      "language": "English"
+    },
+    {
+      "id": "KJV",
+      "name": "King James Version",
+      "shortName": "KJV",
+      "language": "English"
+    },
+    {
+      "id": "ASV",
+      "name": "American Standard Version (1901)",
+      "shortName": "ASV",
+      "language": "English"
+    },
+    {
+      "id": "BBE",
+      "name": "Bible in Basic English",
+      "shortName": "BBE",
+      "language": "English"
+    },
+    {
+      "id": "BSB",
+      "name": "Berean Standard Bible",
+      "shortName": "BSB",
+      "language": "English"
+    },
+    {
+      "id": "DBY",
+      "name": "Darby Translation",
+      "shortName": "DBY",
+      "language": "English"
+    },
+    {
+      "id": "GNV",
+      "name": "Geneva Bible (1599)",
+      "shortName": "GNV",
+      "language": "English"
+    },
+    {
+      "id": "DRA",
+      "name": "Douay-Rheims (1899)",
+      "shortName": "DRA",
+      "language": "English"
+    }
   ]
 }

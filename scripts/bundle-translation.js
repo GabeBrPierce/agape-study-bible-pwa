@@ -48,6 +48,9 @@ const BOOKS = [
 ];
 const BOOK_BY_NR = Object.fromEntries(BOOKS.map(([id], i) => [i + 1, id]));
 
+// bible.helloao.org uses a different code for Nahum than the rest of this app.
+const HELLOAO_BOOK_CODE = { NAH: 'NAM' };
+
 // Known open/free translations available to bundle. Add more entries here as
 // you find them — `source: 'getbible'` fetches one whole-Bible JSON file from
 // api.getbible.net; `source: 'helloao'` fetches one file per chapter from
@@ -82,6 +85,21 @@ const REGISTRY = {
     source: 'helloao', apiId: 'GHT', outId: 'GHT',
     name: "Garth's Hyper-literal Translation", shortName: 'GHT', language: 'English',
     license: 'Open (see bible.helloao.org)',
+  },
+  dby: {
+    source: 'helloao', apiId: 'eng_dby', outId: 'DBY',
+    name: 'Darby Translation', shortName: 'DBY', language: 'English',
+    license: 'Public domain',
+  },
+  gnv: {
+    source: 'helloao', apiId: 'eng_gnv', outId: 'GNV',
+    name: 'Geneva Bible (1599)', shortName: 'GNV', language: 'English',
+    license: 'Public domain',
+  },
+  dra: {
+    source: 'helloao', apiId: 'eng_dra', outId: 'DRA',
+    name: 'Douay-Rheims (1899)', shortName: 'DRA', language: 'English',
+    license: 'Public domain',
   },
 };
 
@@ -188,7 +206,8 @@ async function bundleFromHelloao(cfg) {
       done++;
       if (fs.existsSync(file)) { skipped++; continue; }
       try {
-        const raw = await fetchWithRetry(`https://bible.helloao.org/api/${cfg.apiId}/${bookId}/${chapter}.json`);
+        const apiBook = HELLOAO_BOOK_CODE[bookId] || bookId;
+        const raw = await fetchWithRetry(`https://bible.helloao.org/api/${cfg.apiId}/${apiBook}/${chapter}.json`);
         const json = JSON.parse(raw);
         const bookName = (json.book && json.book.name) || bookId;
         const verses = (json.chapter && json.chapter.content || [])

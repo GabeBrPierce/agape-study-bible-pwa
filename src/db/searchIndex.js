@@ -1,36 +1,39 @@
 /**
  * searchIndex.js
  *
- * Loads the pre-built offline search index from /data/web/search-index.json
+ * Loads the pre-built offline search index from /data/<translationId>/search-index.json
  * and provides fast substring search over all 31k bundled verses.
  *
- * The index is fetched once and kept in memory for the lifetime of the page.
+ * Only the most recently used translation's index is kept in memory (they are
+ * ~5 MB each and this targets low-memory devices); switching translations
+ * fetches the new one, which the service worker serves from cache when offline.
  * Falls back to the IndexedDB chapter cache when the index file is unavailable.
  */
 
-let _index   = null;   // { hash, verseCount, bookCount, generatedAt, verses: [{b,c,v,t}] }
-let _loading = null;   // in-flight Promise (prevents duplicate fetches)
+let _index   = null;   // { id, data: { hash, verseCount, bookCount, generatedAt, verses: [{b,c,v,t}] } }
+let _loading = null;   // { id, promise } in-flight fetch (prevents duplicate fetches)
 
 async function loadIndex(translationId = 'web') {
-  if (_index) return _index;
-  if (_loading) return _loading;
+  if (_index && _index.id === translationId) return _index.data;
+  if (_loading && _loading.id === translationId) return _loading.promise;
 
-  _loading = fetch(`${process.env.PUBLIC_URL}/data/${translationId}/search-index.json`)
+  const promise = fetch(`${process.env.PUBLIC_URL}/data/${translationId}/search-index.json`)
     .then(res => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json();
     })
     .then(data => {
-      _index = data;
-      _loading = null;
+      _index = { id: translationId, data };
+      if (_loading && _loading.promise === promise) _loading = null;
       return data;
     })
     .catch(err => {
-      _loading = null;
+      if (_loading && _loading.promise === promise) _loading = null;
       throw err;
     });
 
-  return _loading;
+  _loading = { id: translationId, promise };
+  return promise;
 }
 
 const searchIndex = {

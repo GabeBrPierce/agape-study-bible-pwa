@@ -5,7 +5,9 @@
  *
  * Cache strategy:
  *  - App shell JS/CSS    → pre-cached on activate (parsed from index.html)
- *  - data/web/**         → pre-cached on activate from data/web-manifest.json (all 1189 chapters)
+ *  - data/<translation>/** → pre-cached on activate from data/precache-manifest.json
+ *                            (every chapter + search index of every bundled translation),
+ *                            then served cache-first. data/cr/ (cross-refs) is NOT matched.
  *  - audio-data/**       → cache-first on demand (large MP3s)
  *  - bible.helloao.org   → network-first, cache fallback
  *  - other same-origin   → stale-while-revalidate
@@ -17,6 +19,11 @@ const DATA_CACHE  = 'agape-pwa-data-v1';
 const SCOPE      = self.registration.scope;                 // e.g. https://host/sub/
 const SCOPE_PATH = new URL(SCOPE).pathname;                 // e.g. /sub/
 const INDEX_URL  = new URL('index.html', SCOPE).href;
+
+// <scope>data/<translation-id>/<anything> — excludes data/cr/ and top-level data/*.json files.
+const TRANSLATION_PATH = new RegExp(
+  '^' + SCOPE_PATH.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + 'data/(?!cr/)[^/]+/'
+);
 
 // ── Install ──────────────────────────────────────────────────────────────────
 // Minimal — just take over quickly. Real caching happens in activate.
@@ -82,8 +89,8 @@ async function preloadShell() {
 }
 
 /**
- * Pre-cache all WEB translation chapters.
- * Reads the path list from data/web-manifest.json (entries are stored as
+ * Pre-cache every bundled translation (chapters + search index).
+ * Reads the path list from data/precache-manifest.json (entries are stored as
  * "/data/web/GEN/1.json"; the leading slash is stripped so they resolve
  * against the scope) then batches fetches 20 at a time.
  * Already-cached entries are skipped, so re-runs are fast.
@@ -91,7 +98,7 @@ async function preloadShell() {
 async function preloadBibleData() {
   try {
     const cache = await caches.open(DATA_CACHE);
-    const res   = await fetch(new URL('data/web-manifest.json', SCOPE).href);
+    const res   = await fetch(new URL('data/precache-manifest.json', SCOPE).href);
     if (!res.ok) return;
     const paths = await res.json();
 
@@ -120,9 +127,10 @@ self.addEventListener('fetch', (event) => {
   try { url = new URL(request.url); } catch { return; }
 
   // ── 1. Bundled Bible data + audio: cache-first (immutable once built) ──────
+  //    data/<id>/... for any translation id, but not data/cr/ (cross-references).
   if (
     url.origin === self.location.origin &&
-    (url.pathname.startsWith(SCOPE_PATH + 'data/web/') ||
+    (TRANSLATION_PATH.test(url.pathname) ||
      url.pathname.startsWith(SCOPE_PATH + 'audio-data/'))
   ) {
     event.respondWith(cacheFirst(request, DATA_CACHE));

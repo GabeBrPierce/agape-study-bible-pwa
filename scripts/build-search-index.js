@@ -2,8 +2,12 @@
 /**
  * build-search-index.js
  *
- * Walks every bundled chapter file under public/data/web/ and produces a
- * single compact search index at public/data/web/search-index.json.
+ * For every translation listed in public/data/manifest.json (plus WEB), walks
+ * its bundled chapter files under public/data/<id>/ and produces a compact
+ * search index at public/data/<id>/search-index.json.
+ *
+ * It also writes public/data/precache-manifest.json: the list of every chapter
+ * file and search index the service worker should precache.
  *
  * Index format:
  *   {
@@ -25,7 +29,7 @@ const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
 
-// Canonical book order (matches bundle-web.js)
+// Canonical book order (matches bundle-translation.js)
 const BOOKS = [
   ['GEN',50],['EXO',40],['LEV',27],['NUM',36],['DEU',34],
   ['JOS',24],['JDG',21],['RUT',4], ['1SA',31],['2SA',24],
@@ -43,10 +47,26 @@ const BOOKS = [
   ['JUD',1], ['REV',22],
 ];
 
-const DATA_DIR = path.join(__dirname, '..', 'public', 'data', 'web');
-const OUT_FILE = path.join(DATA_DIR, 'search-index.json');
+const ROOT_DATA = path.join(__dirname, '..', 'public', 'data');
 
-function run() {
+function translationIds() {
+  const ids = ['web'];
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT_DATA, 'manifest.json'), 'utf8'));
+    for (const t of manifest.translations || []) {
+      if (t.id && !ids.includes(t.id)) ids.push(t.id);
+    }
+  } catch { /* no manifest — WEB only */ }
+  return ids;
+}
+
+function buildIndex(id, precache) {
+  const dataDir = path.join(ROOT_DATA, id);
+  if (!fs.existsSync(dataDir)) {
+    console.warn(`\n[${id}] no data folder — skipped`);
+    return;
+  }
+
   const verses = [];
   const hashInput = crypto.createHash('sha256');
   let missingChapters = 0;
@@ -55,25 +75,25 @@ function run() {
   for (const [book, chapterCount] of BOOKS) {
     let bookHasAny = false;
     for (let ch = 1; ch <= chapterCount; ch++) {
-      const file = path.join(DATA_DIR, book, `${ch}.json`);
+      const file = path.join(dataDir, book, `${ch}.json`);
       if (!fs.existsSync(file)) { missingChapters++; continue; }
+
+      precache.push(`/data/${id}/${book}/${ch}.json`);
 
       let data;
       try {
         data = JSON.parse(fs.readFileSync(file, 'utf8'));
       } catch (e) {
-        console.warn(`  parse error: ${book}/${ch}.json — ${e.message}`);
+        console.warn(`  parse error: ${id}/${book}/${ch}.json — ${e.message}`);
         continue;
       }
 
-      const rawVerses = data.verses || [];
-      for (const v of rawVerses) {
+      for (const v of data.verses || []) {
         const verseNum = v.verse ?? v.number ?? v.verseNumber;
         const text     = (v.text ?? v.content ?? '').trim();
         if (!text) continue;
 
         verses.push({ b: book, c: ch, v: verseNum, t: text });
-        // Feed canonical text into the hash (book:chapter:verse:text\n)
         hashInput.update(`${book}:${ch}:${verseNum}:${text}\n`);
         bookHasAny = true;
       }
@@ -82,24 +102,27 @@ function run() {
   }
 
   const hash = hashInput.digest('hex');
-
-  const index = {
+  const outFile = path.join(dataDir, 'search-index.json');
+  fs.writeFileSync(outFile, JSON.stringify({
     hash,
     verseCount:  verses.length,
     bookCount:   booksFound,
     generatedAt: new Date().toISOString(),
     verses,
-  };
+  }));
+  precache.push(`/data/${id}/search-index.json`);
 
-  fs.writeFileSync(OUT_FILE, JSON.stringify(index));
+  const sizeMB = (fs.statSync(outFile).size / 1024 / 1024).toFixed(2);
+  console.log(`\n[${id}] ${verses.length.toLocaleString()} verses, ${booksFound} books, ${missingChapters} missing chapter files, ${sizeMB} MB index`);
+}
 
-  const sizeMB = (fs.statSync(OUT_FILE).size / 1024 / 1024).toFixed(2);
-  console.log(`\nSearch index written to:\n  ${OUT_FILE}`);
-  console.log(`\n  Verses  : ${verses.length.toLocaleString()}`);
-  console.log(`  Books   : ${booksFound}`);
-  console.log(  `  Missing : ${missingChapters} chapter files`);
-  console.log(`  SHA-256 : ${hash}`);
-  console.log(`  Size    : ${sizeMB} MB (uncompressed)`);
+function run() {
+  const precache = [];
+  for (const id of translationIds()) buildIndex(id, precache);
+
+  const out = path.join(ROOT_DATA, 'precache-manifest.json');
+  fs.writeFileSync(out, JSON.stringify(precache));
+  console.log(`\nPrecache manifest: ${precache.length.toLocaleString()} files -> ${out}`);
 }
 
 run();
