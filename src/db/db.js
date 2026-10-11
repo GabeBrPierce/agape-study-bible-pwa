@@ -324,6 +324,53 @@ export async function deleteReadingProgress(planId) {
   return del('readingProgress', planId);
 }
 
+// ─── Backup / restore ──────────────────────────────────────────────────────────
+// Everything the user creates, as one plain JSON object. Chapter text, search
+// indexes and downloaded translations are not included — they are re-fetchable.
+
+const BACKUP_APP    = 'agape-study-bible';
+const BACKUP_FORMAT = 1;
+const BACKUP_STORES = ['bookmarks', 'highlights', 'favorites', 'readingProgress'];
+
+export async function exportUserData() {
+  const stores = {};
+  for (const name of BACKUP_STORES) stores[name] = await getAll(name);
+  return {
+    app: BACKUP_APP,
+    format: BACKUP_FORMAT,
+    exportedAt: new Date().toISOString(),
+    settings: await getSettings(),
+    stores,
+  };
+}
+
+// Upserts every record by key, so importing never deletes anything already on
+// the device; a record in the file replaces one with the same id.
+// Returns { counts, settings } — the caller applies settings via the app context.
+export async function importUserData(payload) {
+  if (!payload || payload.app !== BACKUP_APP || typeof payload.stores !== 'object') {
+    throw new Error('Not an Agape Study Bible backup file');
+  }
+  if (payload.format > BACKUP_FORMAT) {
+    throw new Error('Backup is from a newer version of the app');
+  }
+
+  const db = await openDB();
+  const counts = {};
+  for (const name of BACKUP_STORES) {
+    const records = Array.isArray(payload.stores[name]) ? payload.stores[name] : [];
+    await new Promise((resolve, reject) => {
+      const t = db.transaction(name, 'readwrite');
+      const store = t.objectStore(name);
+      records.forEach(r => store.put(r));
+      t.oncomplete = resolve;
+      t.onerror = t.onabort = () => reject(t.error);
+    });
+    counts[name] = records.length;
+  }
+  return { counts, settings: payload.settings || null };
+}
+
 // ─── Initialise on first run ──────────────────────────────────────────────────
 
 export async function initDB() {

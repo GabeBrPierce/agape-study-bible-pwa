@@ -21,6 +21,7 @@ import FavoriteSelectionPage from './pages/FavoriteSelectionPage';
 import SettingsPage       from './pages/SettingsPage';
 import VersionSelectionPage from './pages/VersionSelectionPage';
 import InternetUsagePage  from './pages/InternetUsagePage';
+import BackupPage         from './pages/BackupPage';
 import InterlinearPage    from './pages/InterlinearPage';
 import ReadingPlanSelectionPage from './pages/ReadingPlanSelectionPage';
 import DailyReadingPage   from './pages/DailyReadingPage';
@@ -43,6 +44,7 @@ const PAGE_MAP = {
   SettingsPage,
   VersionSelectionPage,
   InternetUsagePage,
+  BackupPage,
   InterlinearPage,
   ReadingPlanSelectionPage,
   DailyReadingPage,

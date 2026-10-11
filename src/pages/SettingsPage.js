@@ -8,6 +8,7 @@ const SETTINGS_ITEMS = [
   { id: 'manageBookmarks', label: 'Manage Bookmarks', type: 'nav'     },
   { id: 'manageHighlights',label: 'Manage Highlights',type: 'nav'     },
   { id: 'internetUsage',   label: 'Internet Usage',   type: 'nav'     },
+  { id: 'backup',          label: 'Backup & Restore', type: 'nav'     },
   { id: 'about',           label: 'About',            type: 'nav'     },
 ];
 
@@ -52,6 +53,9 @@ export default function SettingsPage() {
         break;
       case 'internetUsage':
         push('InternetUsagePage');
+        break;
+      case 'backup':
+        push('BackupPage');
         break;
       case 'about':
         // Simple inline: just display info
