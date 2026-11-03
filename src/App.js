@@ -26,6 +26,7 @@ import InterlinearPage    from './pages/InterlinearPage';
 import ReadingPlanSelectionPage from './pages/ReadingPlanSelectionPage';
 import DailyReadingPage   from './pages/DailyReadingPage';
 import CompareTranslationsPage from './pages/CompareTranslationsPage';
+import CommentaryPage     from './pages/CommentaryPage';
 
 const PAGE_MAP = {
   MainMenu,
@@ -49,6 +50,7 @@ const PAGE_MAP = {
   ReadingPlanSelectionPage,
   DailyReadingPage,
   CompareTranslationsPage,
+  CommentaryPage,
 };
 
 function AppInner() {
