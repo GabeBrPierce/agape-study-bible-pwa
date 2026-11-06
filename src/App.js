@@ -3,6 +3,7 @@ import './App.css';
 import { AppProvider, useApp } from './context/AppContext';
 import { initDB } from './db/db';
 import SoftkeyBar from './components/SoftkeyBar';
+import Toast from './components/Toast';
 
 // Pages
 import MainMenu           from './pages/MainMenu';
@@ -78,6 +79,7 @@ function AppInner() {
     <div className="app-root">
       <PageComponent {...currentPage.props} />
       <SoftkeyBar />
+      <Toast />
     </div>
   );
 }

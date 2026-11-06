@@ -8,7 +8,7 @@ const ITEMS = [
   { id: 'import', label: 'Import backup',  desc: 'Restore from a backup file' },
 ];
 
-const RESTORED_SETTINGS = ['darkMode', 'fontSize', 'internetUsage', 'savedLocation'];
+const RESTORED_SETTINGS = ['darkMode', 'fontSize', 'internetUsage', 'savedLocation', 'activeReadingPlanId'];
 
 function describeCounts(counts) {
   const parts = [
