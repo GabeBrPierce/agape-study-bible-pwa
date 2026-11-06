@@ -22,7 +22,7 @@
   "background_color": "#121212",
   "developer": {
     "name": "Agape",
-    "url": "https://github.com"
+    "url": "https://gabebrpierce.github.io"
   },
   "version": "1.0.0",
   "default_locale": "en-US",
@@ -42,7 +42,7 @@
     "subtitle": "Read, study, and search the Bible",
     "developer": {
       "name": "Agape",
-      "url": "https://github.com"
+      "url": "https://gabebrpierce.github.io"
     }
   }
 }
